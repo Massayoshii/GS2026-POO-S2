@@ -21,7 +21,7 @@ public class DadosTerritorio {
     }
 
     public void setLimiteChuvaMmHora(double limiteChuvaMmHora) {
-        validarValorNaoNegativo(limiteChuvaMmHora, "Limite de chuva");
+        validarLimite(limiteChuvaMmHora, "Limite de chuva");
         this.limiteChuvaMmHora = limiteChuvaMmHora;
     }
 
@@ -30,7 +30,7 @@ public class DadosTerritorio {
     }
 
     public void setLimiteNivelAguaCm(double limiteNivelAguaCm) {
-        validarValorNaoNegativo(limiteNivelAguaCm, "Limite do nível da água");
+        validarLimite(limiteNivelAguaCm, "Limite do nivel da agua");
         this.limiteNivelAguaCm = limiteNivelAguaCm;
     }
 
@@ -39,21 +39,18 @@ public class DadosTerritorio {
     }
 
     public void setLimiteUmidadeSoloPercentual(double limiteUmidadeSoloPercentual) {
-        if (!Double.isFinite(limiteUmidadeSoloPercentual)
-                || limiteUmidadeSoloPercentual < 0
-                || limiteUmidadeSoloPercentual > 100) {
-
+        if (!Double.isFinite(limiteUmidadeSoloPercentual) || limiteUmidadeSoloPercentual <= 0 || limiteUmidadeSoloPercentual > 100) {
             throw new DadosInvalidosException(
-                    "A umidade do solo deve estar entre 0 e 100%."
+                    "O limite de umidade deve ser maior que 0 e menor ou igual a 100%"
             );
         }
         this.limiteUmidadeSoloPercentual = limiteUmidadeSoloPercentual;
     }
 
-    private void validarValorNaoNegativo(double valor, String nomeCampo) {
-        if (!Double.isFinite(valor) || valor < 0) {
+    private void validarLimite(double valor, String nomeCampo) {
+        if (!Double.isFinite(valor) || valor <= 0) {
             throw new DadosInvalidosException(
-                    nomeCampo + " não pode ser negativo ou inválido."
+                    nomeCampo + " deve ser maior que zero"
             );
         }
     }
