@@ -1,5 +1,7 @@
 package br.com.territory.dominio;
 
+import br.com.territory.excecoes.DadosInvalidosException;
+
 public class DadosTerritorio {
     private double limiteChuvaMmHora;
     private double limiteNivelAguaCm;
@@ -41,7 +43,7 @@ public class DadosTerritorio {
                 || limiteUmidadeSoloPercentual < 0
                 || limiteUmidadeSoloPercentual > 100) {
 
-            throw new IllegalArgumentException(
+            throw new DadosInvalidosException(
                     "A umidade do solo deve estar entre 0 e 100%."
             );
         }
@@ -50,7 +52,7 @@ public class DadosTerritorio {
 
     private void validarValorNaoNegativo(double valor, String nomeCampo) {
         if (!Double.isFinite(valor) || valor < 0) {
-            throw new IllegalArgumentException(
+            throw new DadosInvalidosException(
                     nomeCampo + " não pode ser negativo ou inválido."
             );
         }
