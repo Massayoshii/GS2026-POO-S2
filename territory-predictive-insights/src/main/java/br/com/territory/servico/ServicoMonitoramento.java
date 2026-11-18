@@ -5,6 +5,10 @@ import br.com.territory.dominio.Sensor;
 import br.com.territory.dominio.Pluviometro;
 import br.com.territory.dominio.SensorNivelAgua;
 import br.com.territory.dominio.SensorUmidadeSolo;
+import br.com.territory.estrategia.EstrategiaPrevisao;
+import br.com.territory.estrategia.FabricaPrevisao;
+import br.com.territory.estrategia.ResultadoPrevisao;
+import br.com.territory.estrategia.TipoPrevisao;
 import br.com.territory.excecoes.DadosInvalidosException;
 import br.com.territory.repository.AlertaRepository;
 import br.com.territory.repository.MedicaoRepository;
@@ -89,6 +93,22 @@ public class ServicoMonitoramento {
         }
         return medicaoRepository
                 .findByTipoSensorOrderByDataHoraDesc(tipoNormalizado);
+    }
+    public ResultadoPrevisao executarPrevisao(
+            String tipoSensor,
+            TipoPrevisao tipoPrevisao) {
+
+        List<Medicao> medicoes = consultarHistorico(tipoSensor);
+
+        EstrategiaPrevisao estrategia = FabricaPrevisao.criar(tipoPrevisao);
+
+        double valorPrevisto = estrategia.prever(medicoes);
+
+        return new ResultadoPrevisao(
+                tipoSensor.trim().toUpperCase(),
+                valorPrevisto,
+                estrategia.getNomeEstrategia()
+        );
     }
 
     private String obterUnidade(String tipoSensor) {
