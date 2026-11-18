@@ -159,6 +159,42 @@ public class ServicoMonitoramento {
         return alertaSalvo;
     }
 
+    public List<Alerta> consultarAlertas() {
+        return alertaRepository.findAllByOrderByDataHoraDesc();
+    }
+
+    public List<Alerta> consultarAlertasPorSensor(String tipoSensor) {
+        String tipoNormalizado = validarTipoSensor(tipoSensor);
+
+        return alertaRepository
+                .findByTipoSensorOrderByDataHoraDesc(tipoNormalizado);
+    }
+
+    public List<Alerta> consultarAlertasPorNivel(NivelAlerta nivel) {
+        if (nivel == null) {
+            throw new DadosInvalidosException(
+                    "O nivel do alerta deve ser informado"
+            );
+        }
+        return alertaRepository.findByNivelOrderByDataHoraDesc(nivel);
+    }
+
+    public DadosTerritorio consultarLimites() {
+        return dadosTerritorio;
+    }
+
+    public void atualizarLimiteChuva(double novoLimite) {
+        dadosTerritorio.setLimiteChuvaMmHora(novoLimite);
+    }
+
+    public void atualizarLimiteNivelAgua(double novoLimite) {
+        dadosTerritorio.setLimiteNivelAguaCm(novoLimite);
+    }
+
+    public void atualizarLimiteUmidadeSolo(double novoLimite) {
+        dadosTerritorio.setLimiteUmidadeSoloPercentual(novoLimite);
+    }
+
     private double obterLimite(String tipoSensor) {
         return switch (tipoSensor) {
             case "PLUVIOMETRO" ->
@@ -173,9 +209,7 @@ public class ServicoMonitoramento {
         };
     }
 
-    private NivelAlerta determinarNivelAlerta(
-            double valorPrevisto,
-            double limite) {
+    private NivelAlerta determinarNivelAlerta(double valorPrevisto, double limite) {
         if (valorPrevisto >= limite * 1.5) {
             return NivelAlerta.CRITICO;
         }
@@ -194,5 +228,24 @@ public class ServicoMonitoramento {
                     "Tipo de sensor nao reconhecido"
             );
         };
+    }
+
+    private String validarTipoSensor(String tipoSensor) {
+        if (tipoSensor == null || tipoSensor.isBlank()) {
+            throw new DadosInvalidosException(
+                    "O tipo do sensor deve ser informado"
+            );
+        }
+
+        String tipoNormalizado = tipoSensor.trim().toUpperCase();
+
+        if (!List.of("PLUVIOMETRO", "NIVEL_AGUA", "UMIDADE_SOLO")
+                .contains(tipoNormalizado)) {
+
+            throw new DadosInvalidosException(
+                    "Tipo de sensor nao reconhecido"
+            );
+        }
+        return tipoNormalizado;
     }
 }
