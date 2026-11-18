@@ -67,6 +67,30 @@ public class ServicoMonitoramento {
         }
     }
 
+    public List<Medicao> consultarHistorico() {
+
+        return medicaoRepository.findAllByOrderByDataHoraDesc();
+    }
+
+    public List<Medicao> consultarHistorico(String tipoSensor) {
+        if (tipoSensor == null || tipoSensor.isBlank()) {
+            throw new DadosInvalidosException(
+                    "O tipo do sensor deve ser informado"
+            );
+        }
+
+        String tipoNormalizado = tipoSensor.trim().toUpperCase();
+
+        if (!List.of("PLUVIOMETRO", "NIVEL_AGUA", "UMIDADE_SOLO")
+                .contains(tipoNormalizado)) {
+            throw new DadosInvalidosException(
+                    "Tipo de sensor nao reconhecido"
+            );
+        }
+        return medicaoRepository
+                .findByTipoSensorOrderByDataHoraDesc(tipoNormalizado);
+    }
+
     private String obterUnidade(String tipoSensor) {
         return switch (tipoSensor) {
             case "PLUVIOMETRO" -> "mm/h";
