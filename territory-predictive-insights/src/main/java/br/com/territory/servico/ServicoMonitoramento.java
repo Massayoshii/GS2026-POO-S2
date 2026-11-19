@@ -115,18 +115,25 @@ public class ServicoMonitoramento {
         );
     }
 
+
     public Alerta verificarPrevisaoEGerarAlerta(String tipoSensor, TipoPrevisao tipoPrevisao) {
         ResultadoPrevisao resultado =
                 executarPrevisao(tipoSensor, tipoPrevisao);
+
+        return verificarPrevisaoEGerarAlerta(resultado);
+    }
+    public Alerta verificarPrevisaoEGerarAlerta(ResultadoPrevisao resultado) {
+        if (resultado == null) {
+            throw new DadosInvalidosException(
+                    "O resultado da previsao deve ser informado"
+            );
+        }
 
         double limite = obterLimite(resultado.getTipoSensor());
 
         double valorPrevisto = resultado.getValorPrevisto();
 
         if (valorPrevisto < limite) {
-            System.out.println(
-                    "Previsao abaixo do limite. Nenhum alerta foi gerado"
-            );
             return null;
         }
 
@@ -144,6 +151,7 @@ public class ServicoMonitoramento {
                 limite,
                 unidade
         );
+
         Alerta alerta = new Alerta(
                 resultado.getTipoSensor(),
                 valorPrevisto,
@@ -151,13 +159,9 @@ public class ServicoMonitoramento {
                 nivel,
                 motivo
         );
-        Alerta alertaSalvo = alertaRepository.save(alerta);
-
-        System.out.println(
-                "Alerta " + nivel + " gerado e salvo com sucesso"
-        );
-        return alertaSalvo;
+        return alertaRepository.save(alerta);
     }
+
 
     public List<Alerta> consultarAlertas() {
         return alertaRepository.findAllByOrderByDataHoraDesc();
