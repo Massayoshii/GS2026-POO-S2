@@ -4,6 +4,7 @@ import br.com.territory.excecoes.DadosInvalidosException;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 
 @Entity
 @Table(name = "medicoes")
@@ -49,7 +50,12 @@ public class Medicao {
             );
         }
 
-        this.tipoSensor = tipoSensor;
+        String tipoNormalizado = tipoSensor.trim().toUpperCase(Locale.ROOT);
+
+        validarTipoSensor(tipoNormalizado);
+        validarValorPorTipoSensor(valor, tipoNormalizado);
+
+        this.tipoSensor = tipoNormalizado;
     }
 
     public double getValor() {
@@ -62,6 +68,11 @@ public class Medicao {
                     "O valor da medicao nao pode ser negativo ou invalido"
             );
         }
+
+        if (tipoSensor != null) {
+            validarValorPorTipoSensor(valor, tipoSensor);
+        }
+
         this.valor = valor;
     }
 
@@ -80,5 +91,35 @@ public class Medicao {
 
     public LocalDateTime getDataHora() {
         return dataHora;
+    }
+
+    private void validarTipoSensor(String tipoSensor) {
+        if (!tipoSensor.equals("PLUVIOMETRO") && !tipoSensor.equals("NIVEL_AGUA") && !tipoSensor.equals("UMIDADE_SOLO")) {
+            throw new DadosInvalidosException(
+                    "Tipo de sensor nao reconhecido"
+            );
+        }
+    }
+
+    private void validarValorPorTipoSensor(double valor, String tipoSensor) {
+        double limiteMaximo = switch (tipoSensor) {
+
+            case "PLUVIOMETRO" -> 100.0;
+
+            case "NIVEL_AGUA" -> 300.0;
+
+            case "UMIDADE_SOLO" -> 100.0;
+
+            default -> throw new DadosInvalidosException(
+                    "Tipo de sensor nao reconhecido"
+            );
+        };
+
+        if (!Double.isFinite(valor) || valor < 0 || valor > limiteMaximo) {
+            throw new DadosInvalidosException(
+                    "Valor invalido para o sensor " + tipoSensor
+                            + ", faixa permitida de 0 a " + limiteMaximo
+            );
+        }
     }
 }
